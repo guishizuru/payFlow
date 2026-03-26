@@ -17,7 +17,7 @@ import java.util.UUID;
 public class Payment {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
@@ -27,7 +27,7 @@ public class Payment {
     @Column(nullable = false)
     private PaymentStatus status;
 
-    @Column(name = "external_id", unique = true)
+    @Column(name = "external_id", unique = true, nullable = false)
     private String externalId;
 
     @Column(name = "description")

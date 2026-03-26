@@ -12,7 +12,14 @@ import java.util.Random;
 @Component
 public class FakePaymentGateway implements PaymentGateway {
 
-    private final Random random = new Random();
+    private final Random random;
+
+    public FakePaymentGateway() {
+        this.random = new Random();
+    }
+    public FakePaymentGateway(Random random) {
+        this.random = random;
+    }
 
     @Override
     @CircuitBreaker(name = "paymentGateway", fallbackMethod = "fallback")

@@ -6,14 +6,18 @@ import com.br.payFlow.entity.Payment;
 import com.br.payFlow.entity.PaymentStatus;
 import com.br.payFlow.messaging.producer.PaymentProducer;
 import com.br.payFlow.repository.PaymentRepository;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
+@Builder
+@Slf4j
 @RequiredArgsConstructor
 public class PaymentService {
 
@@ -22,11 +26,16 @@ public class PaymentService {
 
     public Payment createPayment(PaymentRequestDTO request, String externalId) {
 
+        if (externalId == null || externalId.isBlank()) {
+            throw new IllegalArgumentException("Idempotency-Key é obrigatório");
+        }
+
         return repository.findByExternalId(externalId)
                 .orElseGet(() -> {
 
+                    log.info("Criando pagamento externalId={}", externalId);
+
                     Payment payment = Payment.builder()
-                            .id(UUID.randomUUID())
                             .amount(request.getAmount())
                             .status(PaymentStatus.PENDING)
                             .externalId(externalId)
@@ -38,10 +47,15 @@ public class PaymentService {
                         Payment saved = repository.save(payment);
                         producer.sendPayment(saved);
 
+                        log.info("Pagamento criado id={} status={}", saved.getId(), saved.getStatus());
+
                         return saved;
+
                     } catch (DataIntegrityViolationException e) {
+                        log.warn("Concorrência detectada externalId={}", externalId);
                         return repository.findByExternalId(externalId).orElseThrow();
                     }
                 });
     }
 }
+

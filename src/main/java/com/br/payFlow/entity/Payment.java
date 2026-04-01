@@ -38,4 +38,6 @@ public class Payment {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    private UUID customerId;
 }

@@ -15,10 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/payments")
 @RequiredArgsConstructor
 public class PaymentController {
-
-    @Autowired
     private PaymentService paymentService;
-
     @PostMapping
     public PaymentResponseDTO createPayment(
             @RequestBody @Valid PaymentRequestDTO requestDTO,
